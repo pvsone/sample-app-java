@@ -2,6 +2,7 @@ package com.example;
 
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowClientOptions;
+import io.temporal.client.WorkflowOptions;
 import io.temporal.serviceclient.SimpleSslContextBuilder;
 import io.temporal.serviceclient.WorkflowServiceStubs;
 import io.temporal.serviceclient.WorkflowServiceStubsOptions;
@@ -13,7 +14,6 @@ import java.io.InputStream;
 public class Main {
 
   static final String TASK_QUEUE = "MyTaskQueue";
-  static final String WORKFLOW_ID = "HelloSSLWorkflow";
 
   public static void main(String[] args) throws Exception {
     InputStream clientCert = new FileInputStream(System.getenv("TEMPORAL_TLS_CERT"));
@@ -38,23 +38,32 @@ public class Main {
     Worker worker = factory.newWorker(TASK_QUEUE);
 
     worker.registerWorkflowImplementationTypes(MyWorkflowImpl.class);
-
-    // worker.registerActivitiesImplementations(...);
+    worker.registerWorkflowImplementationTypes(GreetingWorkflowImpl.class);
+    worker.registerActivitiesImplementations(new GreetingActivitiesImpl());
 
     factory.start();
 
     // Create the workflow client stub. It is used to start our workflow execution.
-    // MyWorkflow workflow =
-    //     client.newWorkflowStub(
-    //         MyWorkflow.class,
-    //         WorkflowOptions.newBuilder()
-    //             .setWorkflowId(WORKFLOW_ID)
-    //             .setTaskQueue(TASK_QUEUE)
-    //             .build());
-
-    // String greeting = workflow.execute();
-    // System.out.println(greeting);
+    MyWorkflow myWorkflow =
+        client.newWorkflowStub(
+            MyWorkflow.class,
+            WorkflowOptions.newBuilder()
+                .setWorkflowId("HelloWorkflow")
+                .setTaskQueue(TASK_QUEUE)
+                .build());
+    String message = myWorkflow.execute();
+    System.out.println(message);
     
+    GreetingWorkflow greetingWorkflow =
+        client.newWorkflowStub(
+            GreetingWorkflow.class,
+            WorkflowOptions.newBuilder()
+                .setWorkflowId("GreetingWorkflow")
+                .setTaskQueue(TASK_QUEUE)
+                .build());
+    String greeting = greetingWorkflow.getGreeting("World");
+    System.out.println(greeting);
+
     // System.exit(0);
   }
 }

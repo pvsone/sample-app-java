@@ -26,4 +26,5 @@ docker run -it --rm \
 Start Workflow
 ```sh
 temporal workflow start --type MyWorkflow -t MyTaskQueue
+temporal workflow start --type GreetingWorkflow -t MyTaskQueue -i '"Peter"'
 ```
