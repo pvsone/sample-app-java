@@ -28,3 +28,10 @@ Start Workflow
 temporal workflow start --type MyWorkflow -t MyTaskQueue
 temporal workflow start --type GreetingWorkflow -t MyTaskQueue -i '"Peter"'
 ```
+
+Run Kubernetes
+```sh
+k create secret tls sample-app-tls --cert=${TEMPORAL_TLS_CERT} --key=${TEMPORAL_TLS_KEY}
+
+envsubst < deploy.yaml | kubectl apply -f -
+```
